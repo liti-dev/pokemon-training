@@ -36,5 +36,10 @@ export const usePokemonTrainer = (
 		}
 	})
 
+	// save whenever pokemon data changes
+	$effect(() => {
+		state.savePokemonData()
+	})
+
 	return state
 }

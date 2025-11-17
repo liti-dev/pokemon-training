@@ -4,16 +4,43 @@ import type { Pokemon, TrainingPhase } from '$lib/types'
 
 const TRAINING_DURATION = 5000
 const EXPERIENCE_RATE = 10 // exp per sec
+const STORAGE_KEY = 'pokemon-trainer-data'
 
 export class PokemonTrainerState {
-	pokemon: Pokemon
+	#selectedPokemon = $state<Pokemon | null>(null)
+	#availablePokemons = $state<Pokemon[]>([])
+	#options: () => PokemonTrainerOptions
 
 	#phase = $state<TrainingPhase>('idle')
 	#elapsed = $state(0)
 
 	// Constructor passes options
 	constructor(options: () => PokemonTrainerOptions) {
-		this.pokemon = $derived(options().initialPokemon!)
+		this.#options = options
+		this.#loadPokemonData()
+	}
+
+	get pokemon() {
+		return this.#selectedPokemon
+	}
+
+	get availablePokemons() {
+		return this.#availablePokemons
+	}
+
+	selectPokemon(pokemon: Pokemon) {
+		if (this.#phase === 'idle') {
+			this.#selectedPokemon = pokemon
+			// Reset training state when switching Pokemon
+			this.#elapsed = 0
+		}
+	}
+
+	selectPokemonByName(name: string) {
+		const pokemon = this.#availablePokemons.find((p) => p.name === name)
+		if (pokemon) {
+			this.selectPokemon(pokemon)
+		}
 	}
 
 	// Derived values
@@ -42,8 +69,8 @@ export class PokemonTrainerState {
 	}
 
 	stopTraining() {
-		if (this.#phase === 'training') {
-			this.pokemon.experience += this.experienceGained
+		if (this.#phase === 'training' && this.#selectedPokemon) {
+			this.#selectedPokemon.experience += this.experienceGained
 			this.#phase = 'idle'
 			this.#elapsed = 0
 		}
@@ -59,9 +86,9 @@ export class PokemonTrainerState {
 	}
 
 	evolve() {
-		if (this.#phase === 'evolved') {
-			this.pokemon.level += 1
-			this.pokemon.experience = 0
+		if (this.#phase === 'evolved' && this.#selectedPokemon) {
+			this.#selectedPokemon.level += 1
+			this.#selectedPokemon.experience = 0
 			this.#phase = 'idle'
 			this.#elapsed = 0
 		}
@@ -70,7 +97,44 @@ export class PokemonTrainerState {
 	reset() {
 		this.#phase = 'idle'
 		this.#elapsed = 0
-		this.pokemon.experience = 0
-		this.pokemon.level = 1
+		if (this.#selectedPokemon) {
+			this.#selectedPokemon.experience = 0
+			this.#selectedPokemon.level = 1
+		}
+	}
+
+	// Load Pokemon data from localStorage
+	#loadPokemonData() {
+		const opts = this.#options()
+
+		if (opts.enablePersistence && typeof localStorage !== 'undefined') {
+			try {
+				const saved = localStorage.getItem(STORAGE_KEY)
+				if (saved) {
+					this.#availablePokemons = JSON.parse(saved)
+					this.#selectedPokemon = this.#availablePokemons[0]
+					return
+				}
+			} catch (error) {
+				console.warn('Failed to load Pokemon data:', error)
+			}
+		}
+
+		// Use options (already merged with defaults)
+		this.#availablePokemons = [...opts.availablePokemons!]
+		this.#selectedPokemon = opts.initialPokemon!
+	}
+
+	// Save Pokemon data to localStorage
+	savePokemonData() {
+		const opts = this.#options()
+
+		if (opts.enablePersistence && typeof localStorage !== 'undefined') {
+			try {
+				localStorage.setItem(STORAGE_KEY, JSON.stringify(this.#availablePokemons))
+			} catch (error) {
+				console.warn('Failed to save Pokemon data:', error)
+			}
+		}
 	}
 }
