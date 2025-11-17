@@ -1,20 +1,14 @@
 <script lang="ts">
 	import { usePokemonTrainer } from '$lib/pokemonTrainer/usePokemonTrainer.svelte.ts'
+	import PokemonCard from '$lib/components/PokemonCard.svelte'
 
-	const trainer = usePokemonTrainer()
+	let trainer = usePokemonTrainer()
 </script>
 
 <div class="container">
 	<h1>Pokémon Training</h1>
 
-	<div class="pokemon-card">
-		<h2>{trainer.pokemon.name}</h2>
-		<div class="stats">
-			<p><strong>Level:</strong> {trainer.pokemon.level}</p>
-			<p><strong>Experience:</strong> {trainer.pokemon.experience}</p>
-			<p><strong>Phase:</strong> {trainer.phase}</p>
-		</div>
-	</div>
+	<PokemonCard pokemon={trainer.pokemon} phase={trainer.phase} />
 
 	<div class="progress-bar">
 		<div class="fill" style="width: {trainer.progress}%"></div>
@@ -47,30 +41,6 @@
 	h1 {
 		text-align: center;
 		color: #333;
-	}
-
-	.pokemon-card {
-		border: 2px solid #ddd;
-		border-radius: 8px;
-		padding: 1.5rem;
-		margin: 1rem 0;
-		background: #f9f9f9;
-	}
-
-	.pokemon-card h2 {
-		margin: 0 0 1rem 0;
-		color: #ff6b00;
-	}
-
-	.stats {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.stats p {
-		margin: 0;
-		font-size: 0.95rem;
 	}
 
 	.progress-bar {

@@ -1,10 +1,4 @@
-export type TrainingPhase = 'idle' | 'training' | 'evolved'
-
-export interface Pokemon {
-	name: string
-	level: number
-	experience: number
-}
+import type { Pokemon } from '$lib/types'
 
 export interface PokemonTrainerOptions {
 	initialPokemon?: Pokemon

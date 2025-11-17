@@ -1,4 +1,6 @@
-import type { Pokemon, PokemonTrainerOptions, TrainingPhase } from './PokemonTrainerOptions'
+import type { PokemonTrainerOptions } from './PokemonTrainerOptions'
+
+import type { Pokemon, TrainingPhase } from '$lib/types'
 
 const TRAINING_DURATION = 5000
 const EXPERIENCE_RATE = 10 // exp per sec
