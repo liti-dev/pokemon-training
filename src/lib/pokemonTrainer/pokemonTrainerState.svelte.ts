@@ -1,6 +1,6 @@
 import type { PokemonTrainerOptions } from './PokemonTrainerOptions'
-
 import type { Pokemon, TrainingPhase } from '$lib/types'
+import { browser } from '$app/environment'
 
 const TRAINING_DURATION = 5000
 const EXPERIENCE_RATE = 10 // exp per sec
@@ -107,7 +107,8 @@ export class PokemonTrainerState {
 	#loadPokemonData() {
 		const opts = this.#options()
 
-		if (opts.enablePersistence && typeof localStorage !== 'undefined') {
+		// check browser to fix vercel ssr error
+		if (opts.enablePersistence && browser) {
 			try {
 				const saved = localStorage.getItem(STORAGE_KEY)
 				if (saved) {
@@ -129,7 +130,8 @@ export class PokemonTrainerState {
 	savePokemonData() {
 		const opts = this.#options()
 
-		if (opts.enablePersistence && typeof localStorage !== 'undefined') {
+		// Only change: use browser instead of typeof localStorage !== 'undefined'
+		if (opts.enablePersistence && browser) {
 			try {
 				localStorage.setItem(STORAGE_KEY, JSON.stringify(this.#availablePokemons))
 			} catch (error) {
